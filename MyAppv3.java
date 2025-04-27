@@ -1,8 +1,8 @@
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.*;
+import javax.swing.border.*;
 
 public class MyAppv3 extends JFrame {
 
@@ -118,6 +118,34 @@ public class MyAppv3 extends JFrame {
         return contentArea;
     }
 
+    private void openPanelForCard(int index) {
+        JPanel newPanel = new JPanel();
+        newPanel.setBackground(new Color(240, 241, 242));
+        newPanel.setLayout(new BorderLayout());
+
+        JLabel label = new JLabel("You opened panel for Card " + (index + 1));
+        label.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        newPanel.add(label, BorderLayout.CENTER);
+
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        backButton.addActionListener(e -> {
+            // Restore the original content area
+            getContentPane().removeAll();
+            add(createContentArea(), BorderLayout.CENTER);
+            revalidate();
+            repaint();
+        });
+        newPanel.add(backButton, BorderLayout.SOUTH);
+
+        // Replace the content area with the new panel
+        getContentPane().removeAll();
+        add(newPanel, BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
+
     private JPanel createClickableCard(int index) {
         JPanel card = new RoundedPanel(15);
         card.setBackground(new Color(255, 252, 250));
@@ -126,7 +154,7 @@ public class MyAppv3 extends JFrame {
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JOptionPane.showMessageDialog(card, "Card " + (index + 1) + " clicked!");
+                openPanelForCard(index);
             }
         });
         return card;
@@ -134,7 +162,7 @@ public class MyAppv3 extends JFrame {
 
     // Custom rounded JPanel
     class RoundedPanel extends JPanel {
-        private int cornerRadius;
+        private final int cornerRadius;
 
         public RoundedPanel(int radius) {
             this.cornerRadius = radius;
@@ -153,7 +181,7 @@ public class MyAppv3 extends JFrame {
 
     // Custom rounded JButton
     class RoundedButton extends JButton {
-        private int cornerRadius;
+        private final int cornerRadius;
 
         public RoundedButton(int radius) {
             this.cornerRadius = radius;
@@ -169,7 +197,8 @@ public class MyAppv3 extends JFrame {
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
             super.paintComponent(g);
         }
-    }
+    }   
+        
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
