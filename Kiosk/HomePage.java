@@ -70,7 +70,7 @@ public class HomePage extends JPanel {
                 backPanel.add(backButton);
                 checkoutPanel.add(backPanel, BorderLayout.NORTH);
                 
-                // Main checkout content (center) - empty for you to fill
+                // Main checkout content (center)
                 JPanel checkoutContent = new JPanel();
                 checkoutContent.setBorder(new EmptyBorder(20, 20, 20, 20));
                 checkoutPanel.add(checkoutContent, BorderLayout.CENTER);
