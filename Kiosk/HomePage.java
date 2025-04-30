@@ -47,7 +47,39 @@ public class HomePage extends JPanel {
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JOptionPane.showMessageDialog(HomePage.this, "You clicked on Card " + (index + 1));
+                // Get the main frame and its content pane
+                JFrame mainFrame = (JFrame)SwingUtilities.getWindowAncestor(HomePage.this);
+                Container contentPane = mainFrame.getContentPane();
+                
+                // Save reference to the original home page
+                Component homePage = contentPane.getComponent(0);
+                
+                // Create checkout panel with back button
+                JPanel checkoutPanel = new JPanel(new BorderLayout());
+                checkoutPanel.setBackground(new Color(240, 240, 240));
+                
+                // Back button panel (top)
+                JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                JButton backButton = new JButton("←");
+                backButton.addActionListener(ev -> {
+                    contentPane.removeAll();
+                    contentPane.add(homePage);
+                    mainFrame.revalidate();
+                    mainFrame.repaint();
+                });
+                backPanel.add(backButton);
+                checkoutPanel.add(backPanel, BorderLayout.NORTH);
+                
+                // Main checkout content (center) - empty for you to fill
+                JPanel checkoutContent = new JPanel();
+                checkoutContent.setBorder(new EmptyBorder(20, 20, 20, 20));
+                checkoutPanel.add(checkoutContent, BorderLayout.CENTER);
+                
+                // Replace content
+                contentPane.removeAll();
+                contentPane.add(checkoutPanel);
+                mainFrame.revalidate();
+                mainFrame.repaint();
             }
         });
         return card;
