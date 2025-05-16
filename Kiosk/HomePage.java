@@ -4,8 +4,28 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HomePage extends JPanel {
+
+    private JPanel cardsGrid;
+    private List<JPanel> allCards = new ArrayList<>();
+    private Map<String, JButton> categoryButtons = new HashMap<>();
+    private List<Integer> cart = new ArrayList<>(); // Store indices of products added to cart
+    private static final String[] CATEGORIES = {
+        "BEST SELLERS", "SNACKS", "THE ORIGINALS", "RICE MEALS", "MILK TEA"
+    };
+    private static final Map<String, String> CATEGORY_MAP = new HashMap<>();
+    static {
+        CATEGORY_MAP.put("BEST SELLERS", "BESTSELLERS");
+        CATEGORY_MAP.put("SNACKS", "SNACKS");
+        CATEGORY_MAP.put("THE ORIGINALS", "THE ORIGINALS");
+        CATEGORY_MAP.put("RICE MEALS", "RICEMEALS");
+        CATEGORY_MAP.put("MILK TEA", "MILKTEA");
+    }
 
     public HomePage() {
         setLayout(new BorderLayout());
@@ -26,29 +46,28 @@ public class HomePage extends JPanel {
         sidebar.add(backButton);
         sidebar.add(Box.createVerticalStrut(50));
 
-        sidebar.add(createCategoryButton("BEST SELLERS", new Color(255, 153, 153)));
-        sidebar.add(Box.createVerticalStrut(30));
-        sidebar.add(createCategoryButton("SNACKS", new Color(255, 204, 204)));
-         sidebar.add(Box.createVerticalStrut(30));
-        sidebar.add(createCategoryButton("THE ORIGINALS", new Color(255, 229, 180)));
-         sidebar.add(Box.createVerticalStrut(30));
-        sidebar.add(createCategoryButton("RICE MEALS", new Color(255, 242, 204)));
-         sidebar.add(Box.createVerticalStrut(30));
-        sidebar.add(createCategoryButton("MILK TEA", new Color(212, 237, 218)));
-
+        for (String cat : CATEGORIES) {
+            JButton btn = createCategoryButton(cat, getCategoryColor(cat));
+            btn.addActionListener(e -> filterCardsByCategory(cat));
+            sidebar.add(btn);
+            sidebar.add(Box.createVerticalStrut(30));
+            categoryButtons.put(cat, btn);
+        }
 
         add(sidebar, BorderLayout.WEST);
 
         // Grid of cards
-        JPanel cardsGrid = new JPanel();
+        cardsGrid = new JPanel();
         cardsGrid.setOpaque(false);
         cardsGrid.setLayout(new GridLayout(2, 3, 10, 10));
         cardsGrid.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        for (int i = 0; i < 6; i++) {
+        // Create all cards and store them
+        for (int i = 0; i < MenuData.ITEMS.size(); i++) {
             JPanel card = createClickableCard(i);
-            cardsGrid.add(card);
+            allCards.add(card);
         }
+        updateCardsGrid(null); // Show all by default
 
         add(cardsGrid, BorderLayout.CENTER);
 
@@ -60,6 +79,41 @@ public class HomePage extends JPanel {
         rightSidebar.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         add(rightSidebar, BorderLayout.EAST);
+    }
+
+    private Color getCategoryColor(String cat) {
+        switch (cat) {
+            case "BEST SELLERS": return new Color(255, 153, 153);
+            case "SNACKS": return new Color(255, 204, 204);
+            case "THE ORIGINALS": return new Color(255, 229, 180);
+            case "RICE MEALS": return new Color(255, 242, 204);
+            case "MILK TEA": return new Color(212, 237, 218);
+            default: return Color.LIGHT_GRAY;
+        }
+    }
+
+    private void filterCardsByCategory(String categoryLabel) {
+        String mappedCategory = CATEGORY_MAP.get(categoryLabel);
+        updateCardsGrid(mappedCategory);
+    }
+
+    private void updateCardsGrid(String category) {
+        cardsGrid.removeAll();
+        int count = 0;
+        for (int i = 0; i < MenuData.ITEMS.size(); i++) {
+            MenuData.MenuItem item = MenuData.ITEMS.get(i);
+            if (category == null || (item != null && item.category.equalsIgnoreCase(category))) {
+                cardsGrid.add(allCards.get(i));
+                count++;
+            }
+        }
+        // Fill empty grid slots if less than 6
+        while (count < 6) {
+            cardsGrid.add(Box.createGlue());
+            count++;
+        }
+        cardsGrid.revalidate();
+        cardsGrid.repaint();
     }
 
     private JButton createCategoryButton(String label, Color bgColor) {
@@ -78,36 +132,32 @@ public class HomePage extends JPanel {
         card.setBackground(Color.LIGHT_GRAY);
         card.setBorder(new LineBorder(new Color(200, 230, 200), 1, true));
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        card.addMouseListener(new MouseAdapter() {
 
+        // Get menu item from MenuData
+        MenuData.MenuItem item = MenuData.ITEMS.get(index);
+        if (item != null) {
+            JLabel nameLabel = new JLabel(item.name);
+            nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+            JLabel priceLabel = new JLabel("₱" + item.price);
+            JLabel descLabel = new JLabel("<html><body style='width:120px'>" + item.description + "</body></html>");
+            card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+            card.add(nameLabel);
+            card.add(priceLabel);
+            card.add(descLabel);
+        }
+
+        card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(HomePage.this);
-                Container contentPane = mainFrame.getContentPane();
-                Component homePage = contentPane.getComponent(0);
-
-                JPanel checkoutPanel = new JPanel(new BorderLayout());
-                checkoutPanel.setBackground(new Color(240, 240, 240));
-
-                JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-                JButton backButton = new JButton("←");
-                backButton.addActionListener(ev -> {
-                    contentPane.removeAll();
-                    contentPane.add(homePage);
-                    mainFrame.revalidate();
-                    mainFrame.repaint();
-                });
-                backPanel.add(backButton);
-                checkoutPanel.add(backPanel, BorderLayout.NORTH);
-
-                JPanel checkoutContent = new JPanel();
-                checkoutContent.setBorder(new EmptyBorder(20, 20, 20, 20));
-                checkoutPanel.add(checkoutContent, BorderLayout.CENTER);
-
-                contentPane.removeAll();
-                contentPane.add(checkoutPanel);
-                mainFrame.revalidate();
-                mainFrame.repaint();
+                // Add to cart instead of opening a new page
+                cart.add(index);
+                MenuData.MenuItem addedItem = MenuData.ITEMS.get(index);
+                JOptionPane.showMessageDialog(
+                    HomePage.this,
+                    addedItem.name + " added to cart!",
+                    "Added to Cart",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
             }
         });
         return card;
