@@ -2,6 +2,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -14,7 +16,6 @@ public class HomePage extends JPanel {
     private JPanel cardsGrid;
     private List<JPanel> allCards = new ArrayList<>();
     private Map<String, JButton> categoryButtons = new HashMap<>();
-    private List<Integer> cart = new ArrayList<>(); // Store indices of products added to cart
     private static final String[] CATEGORIES = {
         "BEST SELLERS", "SNACKS", "THE ORIGINALS", "RICE MEALS", "MILK TEA"
     };
@@ -26,6 +27,11 @@ public class HomePage extends JPanel {
         CATEGORY_MAP.put("RICE MEALS", "RICEMEALS");
         CATEGORY_MAP.put("MILK TEA", "MILKTEA");
     }
+
+    private CartManager cartManager = new CartManager();
+    private JPanel cartPanel; // Panel for cart items
+    private JLabel totalLabel; // Shows total price
+    private double totalPrice = 0.0;
 
     public HomePage() {
         setLayout(new BorderLayout());
@@ -71,12 +77,55 @@ public class HomePage extends JPanel {
 
         add(cardsGrid, BorderLayout.CENTER);
 
-        // Right sidebar (placeholder)
+        // Right sidebar (cart system)
         JPanel rightSidebar = new JPanel();
-        rightSidebar.setPreferredSize(new Dimension(200, 0));
+        rightSidebar.setPreferredSize(new Dimension(250, 0));
         rightSidebar.setBackground(Color.WHITE);
-        rightSidebar.setLayout(new BoxLayout(rightSidebar, BoxLayout.Y_AXIS));
-        rightSidebar.setBorder(new EmptyBorder(20, 20, 20, 20));
+        rightSidebar.setLayout(new BorderLayout());
+        rightSidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
+
+        JLabel cartTitle = new JLabel("🛒 Cart");
+        cartTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
+        cartTitle.setBorder(new EmptyBorder(0, 0, 10, 0));
+
+        cartPanel = new JPanel();
+        cartPanel.setLayout(new BoxLayout(cartPanel, BoxLayout.Y_AXIS));
+        cartPanel.setOpaque(false);
+
+        JScrollPane cartScroll = new JScrollPane(cartPanel);
+        cartScroll.setBorder(null);
+        cartScroll.setPreferredSize(new Dimension(230, 350));
+        cartScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        JPanel cartTop = new JPanel();
+        cartTop.setOpaque(false);
+        cartTop.setLayout(new BorderLayout());
+        cartTop.add(cartTitle, BorderLayout.WEST);
+
+        rightSidebar.add(cartTop, BorderLayout.NORTH);
+        rightSidebar.add(cartScroll, BorderLayout.CENTER);
+
+        // Bottom panel for total and checkout
+        JPanel cartBottom = new JPanel();
+        cartBottom.setOpaque(false);
+        cartBottom.setLayout(new BoxLayout(cartBottom, BoxLayout.Y_AXIS));
+        cartBottom.setBorder(new EmptyBorder(10, 0, 0, 0));
+
+        totalLabel = new JLabel("Total: ₱0.00");
+        totalLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        totalLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JButton checkoutBtn = new JButton("Checkout");
+        checkoutBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        checkoutBtn.setFocusPainted(false);
+        checkoutBtn.setMaximumSize(new Dimension(200, 40));
+        checkoutBtn.addActionListener(e -> showCheckoutDialog());
+
+        cartBottom.add(totalLabel);
+        cartBottom.add(Box.createVerticalStrut(10));
+        cartBottom.add(checkoutBtn);
+
+        rightSidebar.add(cartBottom, BorderLayout.SOUTH);
 
         add(rightSidebar, BorderLayout.EAST);
     }
@@ -136,31 +185,110 @@ public class HomePage extends JPanel {
         // Get menu item from MenuData
         MenuData.MenuItem item = MenuData.ITEMS.get(index);
         if (item != null) {
-            JLabel nameLabel = new JLabel(item.name);
+            JPanel textPanel = new JPanel();
+            textPanel.setOpaque(false);
+            textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+            JLabel nameLabel = new JLabel(item.name + "  ₱" + item.price);
             nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
-            JLabel priceLabel = new JLabel("₱" + item.price);
             JLabel descLabel = new JLabel("<html><body style='width:120px'>" + item.description + "</body></html>");
+            textPanel.add(nameLabel);
+            textPanel.add(descLabel);
+
             card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-            card.add(nameLabel);
-            card.add(priceLabel);
-            card.add(descLabel);
+            card.add(Box.createVerticalGlue());
+            card.add(textPanel);
+            card.add(Box.createVerticalGlue());
+
+            // Add mouse listener to the card itself
+            card.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    cartManager.addToCart(index);
+                    updateCartPanel();
+                    MenuData.MenuItem addedItem = MenuData.ITEMS.get(index);
+                    JOptionPane.showMessageDialog(
+                        HomePage.this,
+                        addedItem.name + " added to cart!",
+                        "Added to Cart",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
+            });
         }
 
-        card.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // Add to cart instead of opening a new page
-                cart.add(index);
-                MenuData.MenuItem addedItem = MenuData.ITEMS.get(index);
-                JOptionPane.showMessageDialog(
-                    HomePage.this,
-                    addedItem.name + " added to cart!",
-                    "Added to Cart",
-                    JOptionPane.INFORMATION_MESSAGE
-                );
-            }
-        });
         return card;
+    }
+
+    private void updateCartPanel() {
+        cartPanel.removeAll();
+        totalPrice = 0.0;
+        Map<Integer, Integer> items = cartManager.getCartItems();
+        for (Map.Entry<Integer, Integer> entry : items.entrySet()) {
+            int idx = entry.getKey();
+            int qty = entry.getValue();
+            MenuData.MenuItem item = MenuData.ITEMS.get(idx);
+            if (item == null || qty <= 0) continue;
+
+            JPanel itemPanel = new JPanel();
+            itemPanel.setLayout(new BorderLayout());
+            itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(180, 180, 180), 1, true),
+                new EmptyBorder(8, 8, 8, 8)
+            ));
+            itemPanel.setMaximumSize(new Dimension(210, 60));
+            itemPanel.setBackground(new Color(250, 250, 250));
+
+            JLabel nameLabel = new JLabel(item.name + "  ₱" + item.price);
+            nameLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
+
+            JPanel qtyPanel = new JPanel();
+            qtyPanel.setOpaque(false);
+            qtyPanel.setLayout(new BoxLayout(qtyPanel, BoxLayout.X_AXIS));
+            JButton minusBtn = new JButton("-");
+            minusBtn.setMargin(new Insets(2, 8, 2, 8));
+            minusBtn.setFocusPainted(false);
+            minusBtn.addActionListener(e -> {
+                cartManager.removeFromCart(idx);
+                updateCartPanel();
+            });
+            JLabel qtyLabel = new JLabel(String.valueOf(qty));
+            qtyLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
+            JButton plusBtn = new JButton("+");
+            plusBtn.setMargin(new Insets(2, 8, 2, 8));
+            plusBtn.setFocusPainted(false);
+            plusBtn.addActionListener(e -> {
+                cartManager.addToCart(idx);
+                updateCartPanel();
+            });
+
+            qtyPanel.add(minusBtn);
+            qtyPanel.add(Box.createHorizontalStrut(5));
+            qtyPanel.add(qtyLabel);
+            qtyPanel.add(Box.createHorizontalStrut(5));
+            qtyPanel.add(plusBtn);
+
+            itemPanel.add(nameLabel, BorderLayout.NORTH);
+            itemPanel.add(qtyPanel, BorderLayout.SOUTH);
+
+            cartPanel.add(itemPanel);
+            cartPanel.add(Box.createVerticalStrut(8));
+        }
+        totalPrice = cartManager.getTotalPrice();
+        totalLabel.setText(String.format("Total: ₱%.2f", totalPrice));
+        cartPanel.revalidate();
+        cartPanel.repaint();
+    }
+
+    private void showCheckoutDialog() {
+        if (cartManager.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Cart is empty!", "Checkout", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        new CheckoutDialog(
+            SwingUtilities.getWindowAncestor(this),
+            cartManager,
+            this::updateCartPanel
+        );
     }
 
     // RoundedPanel class
