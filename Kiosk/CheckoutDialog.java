@@ -166,6 +166,13 @@ public class CheckoutDialog extends JDialog {
         sb.append(String.format("%-18s %13.2f\n", "TOTAL:", total));
         orderArea.setText(sb.toString());
 
+        // Make the order area scrollable and auto-size dialog
+        JScrollPane orderScroll = new JScrollPane(orderArea);
+        orderScroll.setBorder(null);
+        orderScroll.setPreferredSize(new Dimension(320, 180));
+        orderScroll.setAlignmentX(Component.CENTER_ALIGNMENT);
+        orderScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
         JButton doneBtn = styledButton("Done", new Color(76, 175, 80), Color.WHITE);
         doneBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         doneBtn.addActionListener(e -> {
@@ -176,7 +183,10 @@ public class CheckoutDialog extends JDialog {
 
         JButton closeBtn = styledButton("Close", new Color(220, 220, 220), Color.DARK_GRAY);
         closeBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        closeBtn.addActionListener(e -> dispose());
+        closeBtn.addActionListener(e -> {
+            if (onOrderComplete != null) onOrderComplete.run();
+            dispose();
+        });
 
         panel.add(shopName);
         panel.add(shopLoc);
@@ -185,16 +195,18 @@ public class CheckoutDialog extends JDialog {
         panel.add(orderTypeLabel);
         panel.add(paymentLabel);
         panel.add(Box.createVerticalStrut(10));
-        panel.add(orderArea);
+        panel.add(orderScroll);
         panel.add(Box.createVerticalStrut(10));
         panel.add(doneBtn);
         panel.add(Box.createVerticalStrut(8));
         panel.add(closeBtn);
 
         setContentPane(panel);
+        pack(); // Adjust dialog size to fit all contents
+        setLocationRelativeTo(getParent());
         revalidate();
         repaint();
-        setVisible(true); // Ensure dialog is visible when showing receipt
+        setVisible(true);
     }
 
     private JButton styledButton(String text, Color bg, Color fg) {
