@@ -15,13 +15,14 @@ public class HomePage extends JPanel {
     private List<JPanel> allCards = new ArrayList<>();
     private Map<String, JButton> categoryButtons = new HashMap<>();
     private static final String[] CATEGORIES = {
-        "BEST SELLERS", "SNACKS", "THE ORIGINALS", "RICE MEALS", "MILK TEA"
+        "BEST SELLERS", "SNACKS", "WAFFOWLS", "BEVERAGE", "RICE MEALS", "MILK TEA"
     };
     private static final Map<String, String> CATEGORY_MAP = new HashMap<>();
     static {
         CATEGORY_MAP.put("BEST SELLERS", "BESTSELLERS");
+        CATEGORY_MAP.put("WAFFOWLS", "WAFFOWLS");
         CATEGORY_MAP.put("SNACKS", "SNACKS");
-        CATEGORY_MAP.put("THE ORIGINALS", "THE ORIGINALS");
+        CATEGORY_MAP.put("BEVERAGE", "BEVERAGE");
         CATEGORY_MAP.put("RICE MEALS", "RICEMEALS");
         CATEGORY_MAP.put("MILK TEA", "MILKTEA");
     }
@@ -135,14 +136,15 @@ public class HomePage extends JPanel {
     }
 
     private Color getCategoryColor(String cat) {
-        switch (cat) {
-            case "BEST SELLERS": return new Color(255, 153, 153);
-            case "SNACKS": return new Color(255, 204, 204);
-            case "THE ORIGINALS": return new Color(255, 229, 180);
-            case "RICE MEALS": return new Color(255, 242, 204);
-            case "MILK TEA": return new Color(212, 237, 218);
-            default: return Color.LIGHT_GRAY;
-        }
+        return switch (cat) {
+            case "BEST SELLERS" -> new Color(255, 153, 153);
+            case "SNACKS" -> new Color(255, 204, 204);
+            case "BEVERAGE" -> new Color(255, 229, 180);
+            case "WAFFOWLS" -> new Color(204, 229, 255);
+            case "RICE MEALS" -> new Color(255, 242, 204);
+            case "MILK TEA" -> new Color(212, 237, 218);
+            default -> Color.LIGHT_GRAY;
+        };
     }
 
     private void filterCardsByCategory(String categoryLabel) {
