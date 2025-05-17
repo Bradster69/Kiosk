@@ -1,10 +1,9 @@
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 public class CheckoutDialog extends JDialog {
     private final CartManager cartManager;
@@ -33,7 +32,8 @@ public class CheckoutDialog extends JDialog {
         label.setFont(new Font("SansSerif", Font.BOLD, 20));
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel total = new JLabel(String.format("Total: ₱%.2f", cartManager.getTotalPrice()));
+        // Use new total price method
+        JLabel total = new JLabel(String.format("Total: ₱%.2f", cartManager.getTotalPriceWithSize()));
         total.setFont(new Font("SansSerif", Font.PLAIN, 16));
         total.setAlignmentX(Component.CENTER_ALIGNMENT);
         total.setBorder(new EmptyBorder(10, 0, 20, 0));
@@ -103,6 +103,7 @@ public class CheckoutDialog extends JDialog {
         setContentPane(panel);
         revalidate();
         repaint();
+        setVisible(true); // Ensure dialog stays visible after switching pages
     }
 
     private void showReceiptPage() {
@@ -141,11 +142,23 @@ public class CheckoutDialog extends JDialog {
         sb.append(String.format("%-18s %5s %8s\n", "Item", "Qty", "Price"));
         sb.append("--------------------------------------\n");
         double total = 0.0;
-        for (Map.Entry<Integer, Integer> entry : cartManager.getCartItems().entrySet()) {
-            MenuData.MenuItem item = MenuData.ITEMS.get(entry.getKey());
+        for (Map.Entry<CartManager.CartKey, Integer> entry : cartManager.getCartItemsWithSize().entrySet()) {
+            MenuData.MenuItem item = MenuData.ITEMS.get(entry.getKey().index);
             if (item != null) {
-                double line = item.price * entry.getValue();
-                sb.append(String.format("%-18s %5d %8.2f\n", item.name, entry.getValue(), line));
+                String size = entry.getKey().size;
+                int price = 0;
+                String displayName = item.name;
+                if (item.Regprice != null) {
+                    price = item.Regprice;
+                } else if ("MEDIUM".equals(size) && item.MedPrice != null) {
+                    price = item.MedPrice;
+                    displayName += " (Owlet)";
+                } else if ("LARGE".equals(size) && item.LrgPrice != null) {
+                    price = item.LrgPrice;
+                    displayName += " (Owl)";
+                }
+                double line = price * entry.getValue();
+                sb.append(String.format("%-18s %5d %8.2f\n", displayName, entry.getValue(), line));
                 total += line;
             }
         }
@@ -161,6 +174,10 @@ public class CheckoutDialog extends JDialog {
             dispose();
         });
 
+        JButton closeBtn = styledButton("Close", new Color(220, 220, 220), Color.DARK_GRAY);
+        closeBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        closeBtn.addActionListener(e -> dispose());
+
         panel.add(shopName);
         panel.add(shopLoc);
         panel.add(Box.createVerticalStrut(5));
@@ -171,10 +188,13 @@ public class CheckoutDialog extends JDialog {
         panel.add(orderArea);
         panel.add(Box.createVerticalStrut(10));
         panel.add(doneBtn);
+        panel.add(Box.createVerticalStrut(8));
+        panel.add(closeBtn);
 
         setContentPane(panel);
         revalidate();
         repaint();
+        setVisible(true); // Ensure dialog is visible when showing receipt
     }
 
     private JButton styledButton(String text, Color bg, Color fg) {

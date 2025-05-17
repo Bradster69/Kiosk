@@ -1,15 +1,13 @@
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 public class HomePage extends JPanel {
 
@@ -62,10 +60,10 @@ public class HomePage extends JPanel {
 
         add(sidebar, BorderLayout.WEST);
 
-        // Grid of cards
+        // Grid of cards (now scrollable)
         cardsGrid = new JPanel();
         cardsGrid.setOpaque(false);
-        cardsGrid.setLayout(new GridLayout(2, 3, 10, 10));
+        cardsGrid.setLayout(new GridLayout(0, 3, 10, 10)); // 3 columns, any number of rows
         cardsGrid.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         // Create all cards and store them
@@ -75,7 +73,13 @@ public class HomePage extends JPanel {
         }
         updateCardsGrid(null); // Show all by default
 
-        add(cardsGrid, BorderLayout.CENTER);
+        // Wrap cardsGrid in a scroll pane
+        JScrollPane cardsScrollPane = new JScrollPane(cardsGrid);
+        cardsScrollPane.setBorder(null);
+        cardsScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        cardsScrollPane.getVerticalScrollBar().setUnitIncrement(16); // smoother scrolling
+
+        add(cardsScrollPane, BorderLayout.CENTER);
 
         // Right sidebar (cart system)
         JPanel rightSidebar = new JPanel();
@@ -156,11 +160,7 @@ public class HomePage extends JPanel {
                 count++;
             }
         }
-        // Fill empty grid slots if less than 6
-        while (count < 6) {
-            cardsGrid.add(Box.createGlue());
-            count++;
-        }
+        // No need to fill empty grid slots for scrollable layout
         cardsGrid.revalidate();
         cardsGrid.repaint();
     }
@@ -188,7 +188,11 @@ public class HomePage extends JPanel {
             JPanel textPanel = new JPanel();
             textPanel.setOpaque(false);
             textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
-            JLabel nameLabel = new JLabel(item.name + "  ₱" + item.price);
+            Integer price = item.Regprice != null ? item.Regprice
+                        : item.MedPrice != null ? item.MedPrice
+                        : item.LrgPrice != null ? item.LrgPrice
+                        : 0;
+            JLabel nameLabel = new JLabel(item.name + "  ₱" + price);
             nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
             JLabel descLabel = new JLabel("<html><body style='width:120px'>" + item.description + "</body></html>");
             textPanel.add(nameLabel);
@@ -203,15 +207,20 @@ public class HomePage extends JPanel {
             card.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    cartManager.addToCart(index);
-                    updateCartPanel();
-                    MenuData.MenuItem addedItem = MenuData.ITEMS.get(index);
-                    JOptionPane.showMessageDialog(
-                        HomePage.this,
-                        addedItem.name + " added to cart!",
-                        "Added to Cart",
-                        JOptionPane.INFORMATION_MESSAGE
-                    );
+                    // If the item has MedPrice and LrgPrice (no Regprice), ask for size
+                    if (item.Regprice == null && item.MedPrice != null && item.LrgPrice != null) {
+                        showSizeSelectionDialog(index, item);
+                    } else {
+                        cartManager.addToCart(index);
+                        updateCartPanel();
+                        MenuData.MenuItem addedItem = MenuData.ITEMS.get(index);
+                        JOptionPane.showMessageDialog(
+                            HomePage.this,
+                            addedItem.name + " added to cart!",
+                            "Added to Cart",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+                    }
                 }
             });
         }
@@ -219,13 +228,88 @@ public class HomePage extends JPanel {
         return card;
     }
 
+    // Show dialog to pick size for drinks with MedPrice and LrgPrice
+    private void showSizeSelectionDialog(int index, MenuData.MenuItem item) {
+        // Custom panel for better design
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(new EmptyBorder(15, 20, 15, 20));
+
+        JLabel title = new JLabel("<html><b>Select size for:</b><br>" + item.name + "</html>");
+        title.setFont(new Font("SansSerif", Font.BOLD, 16));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JButton owletBtn = new JButton("Owlet (₱" + item.MedPrice + ")");
+        owletBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
+        owletBtn.setBackground(new Color(220, 240, 255));
+        owletBtn.setFocusPainted(false);
+
+        JButton owlBtn = new JButton("Owl (₱" + item.LrgPrice + ")");
+        owlBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
+        owlBtn.setBackground(new Color(255, 240, 200));
+        owlBtn.setFocusPainted(false);
+
+        JButton cancelBtn = new JButton("Cancel");
+        cancelBtn.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        cancelBtn.setBackground(new Color(240, 240, 240));
+        cancelBtn.setFocusPainted(false);
+
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(18));
+        panel.add(owletBtn);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(owlBtn);
+        panel.add(Box.createVerticalStrut(18));
+        panel.add(cancelBtn);
+
+        // Always get the window ancestor for the dialog parent
+        Window parentWindow = SwingUtilities.getWindowAncestor(HomePage.this);
+        final JDialog dialog = new JDialog(parentWindow, "Choose Size", Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setUndecorated(true);
+        dialog.getRootPane().setBorder(BorderFactory.createLineBorder(new Color(180, 180, 180), 2, true));
+        dialog.setContentPane(panel);
+
+        owletBtn.addActionListener(e -> {
+            cartManager.addToCartWithSize(index, "MEDIUM");
+            updateCartPanel();
+            dialog.dispose();
+            JOptionPane.showMessageDialog(
+                HomePage.this,
+                item.name + " (Owlet) added to cart!",
+                "Added to Cart",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        });
+
+        owlBtn.addActionListener(e -> {
+            cartManager.addToCartWithSize(index, "LARGE");
+            updateCartPanel();
+            dialog.dispose();
+            JOptionPane.showMessageDialog(
+                HomePage.this,
+                item.name + " (Owl) added to cart!",
+                "Added to Cart",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        });
+
+        cancelBtn.addActionListener(e -> dialog.dispose());
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(HomePage.this);
+        dialog.setVisible(true);
+    }
+
     private void updateCartPanel() {
         cartPanel.removeAll();
         totalPrice = 0.0;
-        Map<Integer, Integer> items = cartManager.getCartItems();
-        for (Map.Entry<Integer, Integer> entry : items.entrySet()) {
-            int idx = entry.getKey();
+        Map<CartManager.CartKey, Integer> items = cartManager.getCartItemsWithSize();
+        for (Map.Entry<CartManager.CartKey, Integer> entry : items.entrySet()) {
+            CartManager.CartKey key = entry.getKey();
+            int idx = key.index;
             int qty = entry.getValue();
+            String size = key.size;
             MenuData.MenuItem item = MenuData.ITEMS.get(idx);
             if (item == null || qty <= 0) continue;
 
@@ -238,7 +322,20 @@ public class HomePage extends JPanel {
             itemPanel.setMaximumSize(new Dimension(210, 60));
             itemPanel.setBackground(new Color(250, 250, 250));
 
-            JLabel nameLabel = new JLabel(item.name + "  ₱" + item.price);
+            // Determine price based on size
+            int price = 0;
+            String displayName = item.name;
+            if (item.Regprice != null) {
+                price = item.Regprice;
+            } else if ("MEDIUM".equals(size) && item.MedPrice != null) {
+                price = item.MedPrice;
+                displayName += " (Medium)";
+            } else if ("LARGE".equals(size) && item.LrgPrice != null) {
+                price = item.LrgPrice;
+                displayName += " (Large)";
+            }
+
+            JLabel nameLabel = new JLabel(displayName + "  ₱" + price);
             nameLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
 
             JPanel qtyPanel = new JPanel();
@@ -248,7 +345,7 @@ public class HomePage extends JPanel {
             minusBtn.setMargin(new Insets(2, 8, 2, 8));
             minusBtn.setFocusPainted(false);
             minusBtn.addActionListener(e -> {
-                cartManager.removeFromCart(idx);
+                cartManager.removeFromCartWithSize(idx, size);
                 updateCartPanel();
             });
             JLabel qtyLabel = new JLabel(String.valueOf(qty));
@@ -257,7 +354,7 @@ public class HomePage extends JPanel {
             plusBtn.setMargin(new Insets(2, 8, 2, 8));
             plusBtn.setFocusPainted(false);
             plusBtn.addActionListener(e -> {
-                cartManager.addToCart(idx);
+                cartManager.addToCartWithSize(idx, size);
                 updateCartPanel();
             });
 
@@ -273,7 +370,7 @@ public class HomePage extends JPanel {
             cartPanel.add(itemPanel);
             cartPanel.add(Box.createVerticalStrut(8));
         }
-        totalPrice = cartManager.getTotalPrice();
+        totalPrice = cartManager.getTotalPriceWithSize();
         totalLabel.setText(String.format("Total: ₱%.2f", totalPrice));
         cartPanel.revalidate();
         cartPanel.repaint();
