@@ -6,7 +6,7 @@ public class MyAppv3 extends JFrame {
     public MyAppv3() {
         setTitle("Kuwago Cafe");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setUndecorated(true);
+        setUndecorated(false);
         // Optional: use true to remove window borders
 
         
@@ -16,6 +16,8 @@ public class MyAppv3 extends JFrame {
             .setFullScreenWindow(this);
 
         setLayout(new BorderLayout());
+
+        
 
         // Outer background panel
         JPanel outerPanel = new JPanel(new BorderLayout());
