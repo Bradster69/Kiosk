@@ -1,0 +1,168 @@
+Rice Meal
+-------------------------
+tapsilog -         95
+tocilog -          95
+porksilog          100
+cornsilog          110
+spamsilog          115
+Chicken in a plate 95
+cheesy chicken     105
+chicken curry      110
+chicken katsudon   110
+pork katsu         120
+pork gyudon        120
+
+Snacks
+-------------------------
+Fries              60
+-cheese
+-bbq
+-sour&cream
+
+Mojos              75
+nachos             85
+club house         110
+
+Waff-Owls
+-------------------------
+Ham.cheese&egg     90
+bacon.cheese&egg   90
+combo k1           280
+-fries -nacho -mojo -1L lemonade
+
+Beverage           M      L
+----------------------------
+Blue L'ade         35     45
+Pink L'ade         35     45
+Red IceTea         35     45
+L'ade pitcher         100
+Bo'o wo'er            20
+
+=============================================
+MilkTea series      Owlet           Owl
+---------------------------------------------
+cheese cake           70             85
+chocolate             70             85
+cookies&cream         70             85
+Dark Choco            70             85
+Matcha                70             85
+Okinawa               70             85
+Taro                  70             85
+Red Velvet            70             85
+Wintermelon           70             85
+==============================================
+FruitTea Series      Owlet           Owl
+----------------------------------------------
+Blueberry             70             85
+Green Apple           70             85
+Lemon                 70             85
+Lychee                70             85
+Mango                 70             85
+PassionFruit          70             85
+Strawberry            70             85
+==============================================
+Cream cheese series  Owlet           Owl
+----------------------------------------------
+Cheese cake CC        80             95
+Choco  CC             80             95
+Cookie&cream CC       80             95
+Dark Choco CC         80             95
+Matcha CC             80             95
+Okinawa CC            80             95
+Oreo CC               80             95
+Taro CC               80             95
+Red Velvet CC         80             95
+Wintermelon CC        80             95
+================================================
+Yakult Series        Owlet           Owl
+------------------------------------------------
+Blueberry yakult      80             95
+Green apple yak       80             95
+Lemon Yak             80             95
+Lychee Yak            80             95
+Mango Yak             80             95
+Passionfruit Yak      80             95
+Strawberry Yak        80             95
+================================================
+                                            
+   (HOT or ICED)                                          
+COFFEE BASED         Owlet           Owl
+-----------------------------------------------     
+Americano             70             90
+Latte                 90             110
+Cappucino             90             110
+Caramel Macchiato     110            130
+CreamyLatte           110            130
+Cafe Mocha            100            120
+Spanish Latte         100            120
+White Choco Mocha     110            130
+==========================================
+Non-Coffee (hot or iced)
+-Signature choco      90             110
+=============================================
+Matcha series
+-----------------
+Matcha Latte          90             110
+Matcha Espresso       100            120
+Matcha Strawber       110            130
+===========================================
+Iced Coffee Series
+-------------------
+Almond                000            000
+Hazelnut              000            000
+French Vanilla        000            000
+Salted Caramel        000            000
+Strawberry            000            000
+============================================
+Frappuccino
+-----------------
+Blended Hershey's     000            000
+Cookies&Cream         000            000
+French Vanilla        000            000
+Lovers Latte          000            000
+Salted Caramel        000            000
+Tiramisu              000            000
+White Choco Mocha     000            000
+===========================================
+Add-ons
+-----------
+Espresso Shot     15
+Soy Milk          20
+Oat Milk          30
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
