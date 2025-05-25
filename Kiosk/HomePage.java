@@ -28,16 +28,16 @@ public class HomePage extends JPanel {
         CATEGORY_MAP.put("YAKULT", "YAKULT");
         CATEGORY_MAP.put("COFFEE", "COFFEE");
 
-        CATEGORY_IMAGES.put("BEST SELLERS", "assets/category_bestsellers.png");
-        CATEGORY_IMAGES.put("SNACKS", "assets/category_snacks.png");
-        CATEGORY_IMAGES.put("WAFFOWLS", "assets/category_waffowls.png");
-        CATEGORY_IMAGES.put("BEVERAGE", "assets/category_beverage.png");
-        CATEGORY_IMAGES.put("RICE MEALS", "assets/category_ricemeals.png");
-        CATEGORY_IMAGES.put("MILK TEA", "assets/category_milktea.png");
-        CATEGORY_IMAGES.put("FRUIT TEA", "assets/category_fruittea.png");
-        CATEGORY_IMAGES.put("CREAM CHEESE", "assets/category_creamcheese.png");
-        CATEGORY_IMAGES.put("YAKULT", "assets/category_yakult.png");
-        CATEGORY_IMAGES.put("COFFEE", "assets/category_coffee.png");
+        CATEGORY_IMAGES.put("BEST SELLERS", "assets/best_sellers.png");
+        CATEGORY_IMAGES.put("SNACKS", "assets/cheesy_chicken.png");
+        CATEGORY_IMAGES.put("WAFFOWLS", "assets/cheesy_chicken.png");
+        CATEGORY_IMAGES.put("BEVERAGE", "assets/cheesy_chicken.png");
+        CATEGORY_IMAGES.put("RICE MEALS", "assets/cheesy_chicken.png");
+        CATEGORY_IMAGES.put("MILK TEA", "assets/cheesy_chicken.png");
+        CATEGORY_IMAGES.put("FRUIT TEA", "assets/cheesy_chicken.png");
+        CATEGORY_IMAGES.put("CREAM CHEESE", "assets/cheesy_chicken.png");
+        CATEGORY_IMAGES.put("YAKULT", "assets/cheesy_chicken.png");
+        CATEGORY_IMAGES.put("COFFEE", "assets/cheesy_chicken.png");
     }
     private JPanel cartList;
     private JLabel totalText;
@@ -55,7 +55,12 @@ public class HomePage extends JPanel {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        bgImage = new ImageIcon(getClass().getResource("assets/whiteLeaf.png"));
+        // Use light beige as the background fallback
+        bgImage = new ImageIcon(getClass().getResource("assets/light_wood_texture.png")); // Optional texture
+        if (bgImage.getImage() == null) {
+            System.out.println("Warning: Background image not found, using fallback color");
+            setBackground(new Color(230, 215, 190)); // Light Beige
+        }
 
         cart = new CartManager();
 
@@ -70,19 +75,19 @@ public class HomePage extends JPanel {
 
         catBox = new RoundedPanel(20);
         catBox.setLayout(new BoxLayout(catBox, BoxLayout.Y_AXIS));
-        catBox.setBackground(new Color(245, 245, 245, 200));
-        catBox.setBorder(new EmptyBorder(20, 20, 20, 20));
+        catBox.setBackground(new Color(230, 215, 190, 200)); // Semi-transparent light beige
+        catBox.setBorder(new EmptyBorder(20, 20, 20, 40)); // Further increased right padding to 40
 
         JButton backButton = new JButton("← Back");
         backButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         backButton.setPreferredSize(new Dimension(200, 100));
         backButton.setMinimumSize(new Dimension(200, 100));
         backButton.setMaximumSize(new Dimension(200, 100));
-        backButton.setBackground(new Color(200, 200, 200));
+        backButton.setBackground(new Color(180, 140, 80)); // Mustard Yellow
         backButton.setFont(new Font("SansSerif", Font.BOLD, 12));
         backButton.setFocusPainted(false);
         backButton.setOpaque(true);
-        backButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        backButton.setBorder(BorderFactory.createLineBorder(new Color(70, 45, 30), 1)); // Dark Brown border
 
         backButton.addActionListener(e -> {
             updateButtonSelection(backButton);
@@ -137,12 +142,16 @@ public class HomePage extends JPanel {
         cardPanel.add(cardsScrollPane, BorderLayout.CENTER);
 
         cartPanel = new JPanel(new BorderLayout());
-        cartPanel.setBackground(Color.WHITE);
-        cartPanel.setBorder(new EmptyBorder(20, 10, 20, 10));
+        cartPanel.setBackground(new Color(230, 215, 190, 230)); // Semi-transparent light beige
+        cartPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(70, 45, 30), 1, true), // Dark Brown border
+            new EmptyBorder(20, 10, 20, 10)
+        ));
         cartPanel.setVisible(false);
 
         JLabel cartTitle = new JLabel("🛒 Cart");
         cartTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
+        cartTitle.setForeground(new Color(70, 45, 30)); // Dark Brown
         cartTitle.setBorder(new EmptyBorder(0, 0, 10, 0));
 
         cartList = new JPanel();
@@ -171,11 +180,14 @@ public class HomePage extends JPanel {
 
         totalText = new JLabel("Total: ₱0.00");
         totalText.setFont(new Font("SansSerif", Font.BOLD, 14));
+        totalText.setForeground(new Color(70, 45, 30)); // Dark Brown
         totalText.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JButton checkoutBtn = new JButton("Checkout");
         checkoutBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         checkoutBtn.setFocusPainted(false);
+        checkoutBtn.setBackground(new Color(180, 140, 80)); // Mustard Yellow
+        checkoutBtn.setForeground(Color.WHITE);
         checkoutBtn.setMaximumSize(new Dimension(200, 40));
         checkoutBtn.addActionListener(e -> openCheckout());
 
@@ -207,61 +219,58 @@ public class HomePage extends JPanel {
     }
 
     private void updateBounds() {
-    JLayeredPane layeredPane = (JLayeredPane) cartPanel.getParent();
-    int width = layeredPane.getWidth();
-    int height = layeredPane.getHeight();
-    int cartWidth = 250;
+        JLayeredPane layeredPane = (JLayeredPane) cartPanel.getParent();
+        int width = layeredPane.getWidth();
+        int height = layeredPane.getHeight();
+        int cartWidth = 250;
 
-    // Set cardPanel to full size, regardless of cart visibility
-    cardPanel.setBounds(0, 0, width, height);
-    System.out.println("Card panel bounds set to: 0,0," + width + "," + height);
-
-    // Set cartPanel bounds (right-aligned, full height)
-    if (isCartVisible) {
-        cartPanel.setBounds(width - cartWidth, 0, cartWidth, height);
-        System.out.println("Cart panel bounds set to: " + (width - cartWidth) + ",0," + cartWidth + "," + height);
+        cardPanel.setBounds(0, 0, width, height);
+        if (isCartVisible) {
+            cartPanel.setBounds(width - cartWidth, 0, cartWidth, height);
+        }
+        updateCardAreaSize(width);
+        layeredPane.revalidate();
+        layeredPane.repaint();
     }
-
-    // Update card area size based on full width
-    updateCardAreaSize(width);
-    layeredPane.revalidate();
-    layeredPane.repaint();
-}
 
     private void updateCardAreaSize(int availableWidth) {
         int cardWidth = 250;
         int gap = 30;
-        int cardsPerRow = 4;
+        int cardsPerRow = Math.max(1, (availableWidth - 30) / (cardWidth + gap));
         int requiredWidth = cardsPerRow * cardWidth + (cardsPerRow - 1) * gap;
         int adjustedWidth = Math.min(availableWidth - 30, requiredWidth);
         cardArea.setPreferredSize(new Dimension(adjustedWidth, cardArea.getPreferredSize().height));
         cardArea.setMaximumSize(new Dimension(adjustedWidth, Integer.MAX_VALUE));
         cardArea.setMinimumSize(new Dimension(adjustedWidth, 250));
+        cardArea.setLayout(new GridLayout(0, cardsPerRow, gap, 30));
         cardArea.revalidate();
     }
 
     private void updateButtonSelection(JButton selected) {
         if (selectedButton != null) {
-            selectedButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+            selectedButton.setBorder(BorderFactory.createLineBorder(new Color(70, 45, 30), 1)); // Dark Brown
         }
         selectedButton = selected;
-        selectedButton.setBorder(BorderFactory.createLineBorder(new Color(0, 120, 0), 2));
+        selectedButton.setBorder(BorderFactory.createLineBorder(new Color(180, 140, 80), 2)); // Mustard Yellow
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (bgImage != null) {
+        if (bgImage != null && bgImage.getImage() != null) {
             Image image = bgImage.getImage();
             Image scaled = image.getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
             g.drawImage(scaled, 0, 0, this);
+        } else {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setColor(new Color(230, 215, 190)); // Light Beige
+            g2.fillRect(0, 0, getWidth(), getHeight());
         }
     }
 
     private void toggleCart() {
         isCartVisible = !isCartVisible;
         cartPanel.setVisible(isCartVisible);
-        System.out.println("Toggling cart: isCartVisible=" + isCartVisible);
         updateBounds();
         cartPanel.revalidate();
         cartPanel.repaint();
@@ -269,17 +278,17 @@ public class HomePage extends JPanel {
 
     private Color getCatColor(String cat) {
         return switch (cat) {
-            case "BEST SELLERS" -> new Color(255, 153, 153);
-            case "SNACKS" -> new Color(255, 204, 204);
-            case "BEVERAGE" -> new Color(255, 229, 180);
-            case "WAFFOWLS" -> new Color(204, 229, 255);
-            case "RICE MEALS" -> new Color(255, 242, 204);
-            case "MILK TEA" -> new Color(212, 237, 218);
-            case "FRUIT TEA" -> new Color(255, 182, 193);
-            case "CREAM CHEESE" -> new Color(221, 160, 221);
-            case "YAKULT" -> new Color(173, 216, 230);
-            case "COFFEE" -> new Color(210, 180, 140);
-            default -> Color.LIGHT_GRAY;
+            case "BEST SELLERS" -> new Color(70, 45, 30); // Dark Brown
+            case "SNACKS" -> new Color(102, 68, 43); // Medium Brown
+            case "BEVERAGE" -> new Color(135, 90, 60); // Rich Brown
+            case "WAFFOWLS" -> new Color(180, 140, 80); // Mustard Yellow
+            case "RICE MEALS" -> new Color(230, 215, 190); // Light Beige
+            case "MILK TEA" -> new Color(70, 45, 30); // Dark Brown
+            case "FRUIT TEA" -> new Color(102, 68, 43); // Medium Brown
+            case "CREAM CHEESE" -> new Color(135, 90, 60); // Rich Brown
+            case "YAKULT" -> new Color(180, 140, 80); // Mustard Yellow
+            case "COFFEE" -> new Color(230, 215, 190); // Light Beige
+            default -> new Color(230, 215, 190); // Light Beige
         };
     }
 
@@ -319,8 +328,20 @@ public class HomePage extends JPanel {
         button.setBackground(color);
         button.setFocusPainted(false);
         button.setOpaque(true);
-        button.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        button.setBorder(BorderFactory.createLineBorder(new Color(70, 45, 30), 1)); // Dark Brown
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // Add hover effect
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(color.brighter());
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(color);
+            }
+        });
 
         String imagePath = CATEGORY_IMAGES.get(label);
         if (imagePath != null) {
@@ -342,102 +363,123 @@ public class HomePage extends JPanel {
                 System.out.println("Failed to load category image for " + label + ": " + e.getMessage());
                 button.setText(label);
                 button.setFont(new Font("SansSerif", Font.BOLD, 12));
+                button.setForeground(new Color(70, 45, 30)); // Dark Brown
             }
         } else {
             button.setText(label);
             button.setFont(new Font("SansSerif", Font.BOLD, 12));
+            button.setForeground(new Color(70, 45, 30)); // Dark Brown
         }
 
         return button;
     }
 
     private JPanel makeCard(int index) {
-        RoundedPanel card = new RoundedPanel(15);
+        JPanel card = new JPanel(); // Changed from RoundedPanel to JPanel to remove rounded corners
         card.setPreferredSize(new Dimension(250, 250));
         card.setMinimumSize(new Dimension(250, 250));
         card.setMaximumSize(new Dimension(250, 250));
-        card.setBackground(Color.LIGHT_GRAY);
-        card.setBorder(new LineBorder(new Color(200, 230, 200), 1, true));
+        card.setBackground(new Color(230, 215, 190)); // Light Beige
+        card.setBorder(new LineBorder(new Color(180, 140, 80), 1, true)); // Mustard Yellow
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         MenuData.MenuItem item = MenuData.ITEMS.get(index);
-        if (item != null) {
-            JLabel imageLabel;
-            try {
-                ImageIcon icon = new ImageIcon(getClass().getResource(item.imagePath));
-                Image originalImage = icon.getImage();
-                int imgWidth = originalImage.getWidth(null);
-                int imgHeight = originalImage.getHeight(null);
-                int targetSize = 250;
-                double scale = Math.min((double) targetSize / imgWidth, (double) targetSize / imgHeight);
-                int scaledWidth = (int) (imgWidth * scale);
-                int scaledHeight = (int) (imgHeight * scale);
-                Image scaledImage = originalImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
-                imageLabel = new JLabel(new ImageIcon(scaledImage));
-                imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-                imageLabel.setVerticalAlignment(SwingConstants.CENTER);
-            } catch (Exception e) {
-                System.out.println("Failed to load image for " + item.name + ": " + e.getMessage());
-                JPanel text = new JPanel();
-                text.setOpaque(false);
-                text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
-                text.setBorder(new EmptyBorder(10, 10, 10, 10));
+        if (item == null) {
+            System.out.println("Error: No MenuItem found for index " + index);
+            JLabel errorLabel = new JLabel("Item not available");
+            errorLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            errorLabel.setForeground(new Color(70, 45, 30)); // Dark Brown
+            errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            card.setLayout(new BorderLayout());
+            card.add(errorLabel, BorderLayout.CENTER);
+            return card;
+        }
 
-                Integer price = item.Regprice != null ? item.Regprice
-                    : item.MedPrice != null ? item.MedPrice
-                    : item.LrgPrice != null ? item.LrgPrice
-                    : 0;
-                JLabel name = new JLabel(item.name + "  ₱" + price);
-                name.setFont(new Font("SansSerif", Font.BOLD, 16));
-                name.setAlignmentX(Component.CENTER_ALIGNMENT);
-                JLabel desc = new JLabel("<html><div style='text-align: center;'>" + item.description + "</div></html>");
-                desc.setFont(new Font("SansSerif", Font.PLAIN, 12));
-                desc.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel imageLabel;
+        try {
+            ImageIcon icon = new ImageIcon(getClass().getResource(item.imagePath));
+            Image originalImage = icon.getImage();
+            int imgWidth = originalImage.getWidth(null);
+            int imgHeight = originalImage.getHeight(null);
+            int targetSize = 250;
+            double scale = Math.min((double) targetSize / imgWidth, (double) targetSize / imgHeight);
+            int scaledWidth = (int) (imgWidth * scale);
+            int scaledHeight = (int) (imgHeight * scale);
+            Image scaledImage = originalImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+            imageLabel = new JLabel(new ImageIcon(scaledImage));
+            imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+        } catch (Exception e) {
+            System.out.println("Failed to load image for " + item.name + ": " + e.getMessage());
+            JPanel text = new JPanel();
+            text.setOpaque(false);
+            text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+            text.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-                text.add(Box.createVerticalGlue());
-                text.add(name);
-                text.add(Box.createVerticalStrut(10));
-                text.add(desc);
-                text.add(Box.createVerticalGlue());
+            Integer price = item.Regprice != null ? item.Regprice
+                : item.MedPrice != null ? item.MedPrice
+                : item.LrgPrice != null ? item.LrgPrice
+                : 0;
+            JLabel name = new JLabel(item.name + "  ₱" + price);
+            name.setFont(new Font("SansSerif", Font.BOLD, 16));
+            name.setForeground(new Color(70, 45, 30)); // Dark Brown
+            name.setAlignmentX(Component.CENTER_ALIGNMENT);
+            JLabel desc = new JLabel("<html><div style='text-align: center;'>" + item.description + "</div></html>");
+            desc.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            desc.setForeground(new Color(70, 45, 30)); // Dark Brown
+            desc.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-                card.setLayout(new BorderLayout());
-                card.add(text, BorderLayout.CENTER);
-                return card;
-            }
+            text.add(Box.createVerticalGlue());
+            text.add(name);
+            text.add(Box.createVerticalStrut(10));
+            text.add(desc);
+            text.add(Box.createVerticalGlue());
 
             card.setLayout(new BorderLayout());
-            card.add(imageLabel, BorderLayout.CENTER);
-
-            card.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    try {
-                        if (item.Regprice == null && item.MedPrice != null && item.LrgPrice != null) {
-                            showSizeSelectionDialog(index, item);
-                        } else {
-                            cart.addToCart(index);
-                            updateCart();
-                            JOptionPane.showMessageDialog(
-                                SwingUtilities.getWindowAncestor(HomePage.this),
-                                item.name + " added to cart!",
-                                "Added",
-                                JOptionPane.INFORMATION_MESSAGE
-                            );
-                        }
-                        leftPanel.revalidate();
-                        leftPanel.repaint();
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(
-                            SwingUtilities.getWindowAncestor(HomePage.this),
-                            "Error adding item to cart!",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                        );
-                        System.out.println("Error clicking product: " + ex.getMessage());
-                    }
-                }
-            });
+            card.add(text, BorderLayout.CENTER);
+            return card;
         }
+
+        card.setLayout(new BorderLayout());
+        card.add(imageLabel, BorderLayout.CENTER);
+
+        card.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Window ancestor = SwingUtilities.getWindowAncestor(HomePage.this);
+                    if (ancestor == null) {
+                        System.out.println("Error: No window ancestor found for HomePage");
+                        return;
+                    }
+                    if (item.Regprice == null && item.MedPrice != null && item.LrgPrice != null) {
+                        System.out.println("Showing size selection dialog for item: " + item.name);
+                        showSizeSelectionDialog(index, item);
+                    } else {
+                        System.out.println("Adding item to cart: " + item.name + ", index: " + index);
+                        cart.addToCart(index);
+                        updateCart();
+                        JOptionPane.showMessageDialog(
+                            ancestor,
+                            item.name + " added to cart!",
+                            "Added",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+                    }
+                    leftPanel.revalidate();
+                    leftPanel.repaint();
+                } catch (Exception ex) {
+                    System.out.println("Error in mouseClicked for item " + item.name + ": " + ex.getMessage());
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(
+                        SwingUtilities.getWindowAncestor(HomePage.this),
+                        "Error adding item to cart: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        });
 
         return card;
     }
@@ -445,26 +487,30 @@ public class HomePage extends JPanel {
     private void showSizeSelectionDialog(int index, MenuData.MenuItem item) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(new Color(230, 215, 190)); // Light Beige
         panel.setBorder(new EmptyBorder(15, 20, 15, 20));
 
         JLabel title = new JLabel("<html><b>Select size for:</b><br>" + item.name + "</html>");
         title.setFont(new Font("SansSerif", Font.BOLD, 16));
+        title.setForeground(new Color(70, 45, 30)); // Dark Brown
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JButton owletBtn = new JButton("Owlet (₱" + item.MedPrice + ")");
         owletBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
-        owletBtn.setBackground(new Color(220, 240, 255));
+        owletBtn.setBackground(new Color(135, 90, 60)); // Rich Brown
+        owletBtn.setForeground(Color.WHITE);
         owletBtn.setFocusPainted(false);
 
         JButton owlBtn = new JButton("Owl (₱" + item.LrgPrice + ")");
         owlBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
-        owlBtn.setBackground(new Color(255, 240, 200));
+        owlBtn.setBackground(new Color(180, 140, 80)); // Mustard Yellow
+        owlBtn.setForeground(Color.WHITE);
         owlBtn.setFocusPainted(false);
 
         JButton cancelBtn = new JButton("Cancel");
         cancelBtn.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        cancelBtn.setBackground(new Color(240, 240, 240));
+        cancelBtn.setBackground(new Color(102, 68, 43)); // Medium Brown
+        cancelBtn.setForeground(Color.WHITE);
         cancelBtn.setFocusPainted(false);
 
         panel.add(title);
@@ -478,7 +524,7 @@ public class HomePage extends JPanel {
         Window parentWindow = SwingUtilities.getWindowAncestor(HomePage.this);
         final JDialog dialog = new JDialog(parentWindow, "Choose Size", Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setUndecorated(true);
-        dialog.getRootPane().setBorder(BorderFactory.createLineBorder(new Color(180, 180, 180), 2, true));
+        dialog.getRootPane().setBorder(BorderFactory.createLineBorder(new Color(180, 140, 80), 2, true)); // Mustard Yellow
         dialog.setContentPane(panel);
 
         owletBtn.addActionListener(e -> {
@@ -525,13 +571,13 @@ public class HomePage extends JPanel {
             if (item == null || qty <= 0) continue;
 
             JPanel itemPanel = new JPanel();
-            itemPanel.setLayout(new BorderLayout());
-            itemPanel.setMaximumSize(new Dimension(230, 60));
+            itemPanel.setLayout(new BoxLayout(itemPanel, BoxLayout.Y_AXIS));
+            itemPanel.setMaximumSize(new Dimension(230, 100));
             itemPanel.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(new Color(180, 180, 180), 1, true),
-                new EmptyBorder(8, 8, 8, 8)
+                new LineBorder(new Color(180, 140, 80), 1, true), // Mustard Yellow
+                new EmptyBorder(10, 10, 10, 10)
             ));
-            itemPanel.setBackground(new Color(250, 250, 250));
+            itemPanel.setBackground(new Color(230, 215, 190)); // Light Beige
 
             int price = 0;
             String displayName = item.name;
@@ -546,38 +592,45 @@ public class HomePage extends JPanel {
             }
 
             JLabel name = new JLabel(displayName + "  ₱" + price);
-            name.setFont(new Font("SansSerif", Font.PLAIN, 13));
+            name.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            name.setForeground(new Color(70, 45, 30)); // Dark Brown
+            name.setAlignmentX(Component.CENTER_ALIGNMENT);
 
             JPanel qtyPanel = new JPanel();
             qtyPanel.setOpaque(false);
+            qtyPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
             JButton minus = new JButton("−");
             minus.setMargin(new Insets(2, 8, 2, 8));
             minus.setFocusPainted(false);
+            minus.setBackground(new Color(102, 68, 43)); // Medium Brown
+            minus.setForeground(Color.WHITE);
             minus.addActionListener(e -> {
                 cart.removeFromCartWithSize(id, size);
                 updateCart();
             });
             JLabel qtyText = new JLabel(String.valueOf(qty));
-            qtyText.setFont(new Font("SansSerif", Font.BOLD, 13));
+            qtyText.setFont(new Font("SansSerif", Font.BOLD, 12));
+            qtyText.setForeground(new Color(70, 45, 30)); // Dark Brown
             JButton plus = new JButton("+");
             plus.setMargin(new Insets(2, 8, 2, 8));
             plus.setFocusPainted(false);
+            plus.setBackground(new Color(102, 68, 43)); // Medium Brown
+            plus.setForeground(Color.WHITE);
             plus.addActionListener(e -> {
                 cart.addToCartWithSize(id, size);
                 updateCart();
             });
 
             qtyPanel.add(minus);
-            qtyPanel.add(Box.createHorizontalStrut(5));
             qtyPanel.add(qtyText);
-            qtyPanel.add(Box.createHorizontalStrut(5));
             qtyPanel.add(plus);
 
-            itemPanel.add(name, BorderLayout.NORTH);
-            itemPanel.add(qtyPanel, BorderLayout.SOUTH);
+            itemPanel.add(name);
+            itemPanel.add(Box.createVerticalStrut(15));
+            itemPanel.add(qtyPanel);
 
             cartList.add(itemPanel);
-            cartList.add(Box.createVerticalStrut(8));
+            cartList.add(Box.createVerticalStrut(15));
         }
         total = cart.getTotalPriceWithSize();
         totalText.setText(String.format("Total: ₱%.2f", total));
@@ -625,16 +678,16 @@ public class HomePage extends JPanel {
 
         public TopBar() {
             setLayout(new BorderLayout());
-            setBackground(new Color(50, 50, 50));
+            setBackground(new Color(230, 215, 190)); // Light Beige
             setPreferredSize(new Dimension(1000, 70));
 
             JLabel name = new JLabel("KUWAGO CAFE");
             name.setFont(new Font("SansSerif", Font.BOLD, 18));
-            name.setForeground(Color.WHITE);
+            name.setForeground(new Color(70, 45, 30)); // Dark Brown
 
             JButton cartBtn = new JButton("🛒 VIEW CART");
             cartBtn.setFocusPainted(false);
-            cartBtn.setBackground(Color.BLACK);
+            cartBtn.setBackground(new Color(180, 140, 80)); // Mustard Yellow
             cartBtn.setForeground(Color.WHITE);
             cartBtn.setBorderPainted(false);
             cartBtn.setOpaque(true);
@@ -660,7 +713,7 @@ public class HomePage extends JPanel {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             int h = getHeight();
-            g2.setPaint(new GradientPaint(0, h - 1, new Color(0, 0, 0, 80), 0, h + 10, new Color(0, 0, 0, 0)));
+            g2.setPaint(new GradientPaint(0, h - 1, new Color(230, 215, 190, 80), 0, h + 10, new Color(230, 215, 190, 0))); // Light Beige gradient
             g2.fillRect(0, h - 1, getWidth(), 10);
             g2.dispose();
         }
